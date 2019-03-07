@@ -2,38 +2,48 @@
 
 % im = imread('Fig1116(leg_bone).tif');
 
+% Load, filter, and binarize the noisy image
 se = strel('square', 10);
 im = imread('Fig1105(a)(noisy_stroke).tif');
 im = imopen(im,se);
 im = imbinarize(im);
 
-
-
 [ROW,COL] = size(im);
-p = zeros(1,9);
 
+% Create a vector to store the p values
+p = zeros(1,9);
 
 im2 = im;
 
-
+% Set the condition flags to false
 flagA = false;
 flagB = false;
 flagC = false;
 flagD = false;
 
+% Set step 2 flag to false.
 step2Flag = false;
-loopCount = 0;
-p = zeros(1,9);
 
+% Set flag indicating there are still points to delete
 it = true;
-%% Step 2 - Reapply step 1 to new image
+iterationCount = 0;
+
+%% While there are still points to delete - apply two steps
 while(it == true)
     
+    % Track the number of iterations
+    iterationCount = iterationCount + 1;
+    
+    % Initial flag to indicate start of step 1
     step2Flag = false;
+    
+    % Loop through steps 1 and 2
     for step = 1 : 2
+        
+        % Matrix to flag points for deletion
         flaggedPoint = zeros(ROW,COL);
 
-        %% Step 1 - Flag points for deletion
+        %% Step - Flag points for deletion based on iteration step
         for i = 2 : ROW -1
             for j = 2 : COL -1
 
@@ -48,38 +58,36 @@ while(it == true)
                 p(8) = im(i-1,j);
                 p(9) = im(i-1,j-1);
                 
-                % Apply the four flags
+                % If the point is a bourder point - Apply the four
+                % conditional checks
                 if(p(1) == 1 && (p(2) == 0|| p(3)==0||p(4)==0||p(5)==0||p(6)==0||p(7)==0||p(8)==0||p(9)==0))
-                    % Flag A
-                    aCount = 0;
-                    loopCount = loopCount +1;
                    
-                    % Count the number of non-zero neighbours of p1
+                    % Condition A - Count the number of non-zero neighbours of p1
+                    aCount = 0;
                     for x = 2 : numel(p)
                         if(p(x))
                             aCount = aCount + 1;
                         end
                     end
                     
+                    % 2<= N(p(1)) <=6
                     if( aCount >= 2 && aCount <= 6)
                         flagA = true;
                     end
                     
                   
-                    
-                    % Flag B
-                    bCount = 0;
-                    
-                    % COunt the number of 0-1 transitions
+                    % Condition B - Count the number of 0-1 transitions
+                    bCount = 0; 
                     for x = 2 : numel(p)
                         y = x+1;
+                        
+                        % Check between p(9) - p(2)
                         if(x == 9)
                             y = 2;
                         end
+                        
                         if((p(x) == 0 && p(y) == 1))
-                            
                             bCount = bCount + 1;
-                            
                         end
                     end
                     
@@ -88,21 +96,21 @@ while(it == true)
                         flagB = true;
                     end
                     
-                    % Flag C
+                    % Condition C - dependant on which step is being appled
                     if((p(2)*p(4)*p(6)) == 0 && (step2Flag == false))
                         flagC = true;
                     elseif(p(2)*p(4)*p(8) == 0 && (step2Flag == true))
                         flagC = true;
                     end
                     
-                    % Flag D
+                    % Condition D - dependant on which step is being appled
                     if((p(4)*p(6)*p(8) == 0) && (step2Flag == false))
                         flagD = true;
                     elseif( (p(2)*p(6)*p(8) == 0) && (step2Flag == true))
                         flagD = true;
                     end
                                         
-                    % If all flags pass, flag that point for deletion
+                    % If all conditions pass, flag that point for deletion
                     if(flagA && flagB && flagC && flagD)
                         flaggedPoint(i,j) = 1;
                     end
@@ -118,8 +126,11 @@ while(it == true)
             
         end
         
+        % Variable to track whether points have been flagged in current
+        % step.
         c = 0;
-        % Delete points based on step  results
+        
+        % At the end of each step - delete flagged points
         for i = 1 : ROW
             for j = 1 : COL
                 if(flaggedPoint(i,j) == 1)
@@ -129,17 +140,16 @@ while(it == true)
                 end
             end
         end
+        
+        % If no points have been flagged - stop.
         if(c == 0)
            it = false; 
         end
+        
         % Start step 2 flags
         step2Flag = true;
     end
 end
 
-% warning('off', 'Images:initSize:adjustingMag');
-% figure
+% Show skeleton image
 imshow(im);
-% figure
-% imshow(im2)
-impixelinfo()
