@@ -3,10 +3,18 @@
 % im = imread('Fig1116(leg_bone).tif');
 
 % Load, filter, and binarize the noisy image
-se = strel('square', 10);
-im = imread('Fig1105(a)(noisy_stroke).tif');
-im = imopen(im,se);
-im = imbinarize(im);
+
+% se = strel('square', 10);
+% im = imread('Fig1105(a)(noisy_stroke).tif');
+% im = imopen(im,se);
+% im = imbinarize(im);
+
+% Load in, reverse, and filter the chromosome image
+im = imread('electron_micrograph_of_a_human_chromosome.jpg');
+im = 1-im2double(im);
+h = fspecial('gaussian',25,15);
+im = imfilter(im,h,'replicate');
+im = im2bw(im,1.7*graythresh(im));
 
 [ROW,COL] = size(im);
 

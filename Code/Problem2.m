@@ -3,12 +3,12 @@ close all
 
 
 
-% im = imread('chromosome.TIF');
-im = imread('Fig1116(leg_bone).tif');
+im = imread('chromosome.TIF');
+%im = imread('Fig1116(leg_bone).tif');
 count = 1;
 p = zeros(1,9);
-start = 1;
-scale = 1.1;
+% start = 1;
+% scale = 1.1;
 % trans = -20;
 % rot = exp(j*(0.02));
 
@@ -21,7 +21,7 @@ contour = bwtraceboundary(im, [rows(1), cols(1)], 'N');
 
 % contour = contour*rot;
 
-contour = contour*scale;
+% contour = contour*scale;
 
 % Translation
 % contour = contour + trans;
@@ -30,7 +30,7 @@ contour = contour*scale;
 % contour(2) = contour(2) + 0;
 
 
-for i=start:128
+for i=1:128
     
     c(i) = contour(round(2),1) + j*contour(round(2), 2);
 end
@@ -49,7 +49,7 @@ end
 
 C = fft(c);
 
-C = C*scale;
+% C = C*scale;
 
 % C(numel(C)) = C(numel(C)) + trans;
 
@@ -58,9 +58,9 @@ C = C*scale;
 
 % Chop out some of the smaller coefficients (less than umax)
 % umax = 32;
-umax = 8; 
+umax = 128; 
 Capprox = C;
-for u=start:128
+for u=1:128
     if u > umax & u < 128-umax
         Capprox(u) = 0;
     end
